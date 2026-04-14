@@ -5,47 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>숨은 고양이 찾기</title>
     <style>
-        /* 1. 웹(PC)에서 무조건 540px로 보이게 강제 고정 */
+        body { text-align: center; background-color: #f4f4f4; font-family: sans-serif; }
+        
+        /* 1. 요청하신 가로 700px로 고정 (모바일에서는 화면에 맞춤) */
         #game-container {
             position: relative;
-            width: 540px !important; 
+            display: inline-block;
+            width: 700px !important; 
+            max-width: 98vw; 
             margin: 0 auto;
-            border: 5px solid #fff;
+            cursor: default !important; /* 커서 고정 */
+            border: 5px solid white;
             box-shadow: 0 0 20px rgba(0,0,0,0.2);
-            /* 2. 마우스 커서를 화살표로 '박제' */
-            cursor: default !important;
-            overflow: hidden;
-            touch-action: none;
         }
 
         img#target-img {
             width: 100% !important;
             height: auto !important;
             display: block;
-            /* 이미지 위에서도 커서 변화 금지 */
             cursor: default !important;
         }
 
-        /* 클릭했을 때 생기는 빨간 원 */
+        /* 클릭 성공 시 나타나는 동그라미 */
         .circle {
             position: absolute;
-            border: 3px solid #ff4757;
+            border: 4px solid #ff4757;
             border-radius: 50%;
-            width: 40px; height: 40px;
             transform: translate(-50%, -50%);
             pointer-events: none;
             z-index: 999;
+            animation: pop 0.3s ease-out;
         }
 
-        #status { font-size: 20px; font-weight: bold; margin: 20px 0; }
+        @keyframes pop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        #status { font-size: 22px; font-weight: bold; margin: 20px 0; color: #333; }
+        #count { color: #ff4757; font-size: 28px; }
     </style>
 </head>
 <body>
 
-    <div id="status">찾은 고양이: <span id="count">0</span> / 12</div>
+    <div id="status">🕵️‍♂️ 찾은 고양이: <span id="count">0</span> / 12</div>
 
-    <div id="game-container" id="game-box">
-        <img src="최종그림.jpg" id="target-img">
+    <div id="game-container">
+        <img src="최종그림.jpg" id="target-img" draggable="false">
     </div>
 
     <script>
@@ -54,20 +60,20 @@
         const foundList = new Set();
         const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLScmhmcfHlquFg68DTqJqikfPwPRqwUyS66LEysWBG6RcxZjSw/viewform?usp=sharing&ouid=112846644520359554445";
 
-        // 이미지 원본(1080x1440) 대비 좌표 데이터 (사각형 범위)
+        // 원본 이미지(1080x1440) 기준 좌표 및 판정 범위 확장
         const catAreas = [
-            {id:1, x1:180, y1:2120, x2:300, y2:2200},
-            {id:2, x1:760, y1:2050, x2:910, y2:2160},
-            {id:3, x1:1100, y1:1990, x2:1220, y2:2110},
-            {id:4, x1:1470, y1:1880, x2:1590, y2:2100},
-            {id:5, x1:130, y1:1730, x2:270, y2:1840},
-            {id:6, x1:1530, y1:1120, x2:1680, y2:1260},
-            {id:7, x1:1160, y1:1110, x2:1330, y2:1320},
-            {id:8, x1:390, y1:900, x2:510, y2:1030},
-            {id:9, x1:570, y1:520, x2:710, y2:650},
-            {id:10, x1:1190, y1:740, x2:1310, y2:870},
-            {id:11, x1:820, y1:1070, x2:1070, y2:1210},
-            {id:12, x1:160, y1:830, x2:280, y2:950}
+            {id:1, x:240, y:2160, r:60},  // 좌표를 중심점으로 변경하고 반지름(r) 부여
+            {id:2, x:835, y:2105, r:70},
+            {id:3, x:1160, y:2050, r:70},
+            {id:4, x:1530, y:2000, r:80},
+            {id:5, x:200, y:1785, r:70},
+            {id:6, x:1605, y:1190, r:80},
+            {id:7, x:1245, y:1215, r:90},
+            {id:8, x:450, y:965, r:70},
+            {id:9, x:640, y:585, r:70},
+            {id:10, x:1250, y:805, r:70},
+            {id:11, x:945, y:1140, r:100},
+            {id:12, x:220, y:890, r:70}
         ];
 
         const container = document.getElementById('game-container');
@@ -76,35 +82,46 @@
         container.addEventListener('click', function(e) {
             const rect = img.getBoundingClientRect();
             
-            // 현재 화면상의 클릭 위치
+            // 실제 클릭한 위치 (픽셀)
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
 
-            // 이미지가 줄어든 비율 계산 (540px / 1080px 등)
+            // 현재 이미지 크기와 원본의 비율 계산
             const ratioX = img.clientWidth / 1080;
             const ratioY = img.clientHeight / 1440;
 
-            // 클릭한 위치를 원본 좌표로 변환
+            // 클릭 위치를 원본 좌표계로 역산
             const logicX = mouseX / ratioX;
             const logicY = mouseY / ratioY;
 
+            let hit = false;
             catAreas.forEach(cat => {
                 if (!foundList.has(cat.id)) {
-                    if (logicX >= cat.x1 && logicX <= cat.x2 && logicY >= cat.y1 && logicY <= cat.y2) {
+                    // 중심점으로부터의 거리를 계산하여 범위 판정 (훨씬 정확함)
+                    const dist = Math.sqrt(Math.pow(logicX - cat.x, 2) + Math.pow(logicY - cat.y, 2));
+                    
+                    if (dist < cat.r) { // 반지름(r) 안에 들어오면 정답
+                        hit = true;
                         foundList.add(cat.id);
                         foundCount++;
                         document.getElementById('count').innerText = foundCount;
 
-                        // 빨간 원 생성
+                        // 동그라미 표시
                         const circle = document.createElement('div');
                         circle.className = 'circle';
                         circle.style.left = mouseX + 'px';
                         circle.style.top = mouseY + 'px';
+                        
+                        // 동그라미 크기도 이미지 크기에 맞춰 조절
+                        const cSize = 60 * ratioX;
+                        circle.style.width = cSize + 'px';
+                        circle.style.height = cSize + 'px';
+                        
                         container.appendChild(circle);
 
                         if (foundCount === totalCats) {
                             setTimeout(() => {
-                                alert("모두 찾았습니다! 응모 폼으로 이동합니다.");
+                                alert("🎉 축하합니다! 12마리를 모두 찾았습니다.\n응모 폼으로 이동합니다.");
                                 window.location.href = googleFormUrl;
                             }, 500);
                         }
