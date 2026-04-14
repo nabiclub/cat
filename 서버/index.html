@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>숨은 고양이 12마리 찾기 챌린지!</title>
+    <style>
+        body { 
+            text-align: center; 
+            background-color: #f0f0f0; 
+            margin: 0; 
+            padding: 40px 0;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+        
+        #status-bar {
+            background: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        #count { color: #ff4757; font-size: 28px; }
+
+        #game-container { 
+            position: relative; 
+            display: inline-block;
+            border: 8px solid white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            background-color: #fff;
+        }
+
+        /* 클릭 시 나타나는 동그라미 스타일 */
+        .circle {
+            position: absolute;
+            border: 4px solid #ff4757;
+            border-radius: 50%;
+            width: 60px; /* 고양이 크기에 맞춰 조절 */
+            height: 60px;
+            transform: translate(-50%, -50%);
+            pointer-events: none; 
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+        }
+
+        @keyframes pop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* 이미지 원본 사이즈 (1080x1440 기준) */
+        img { display: block; width: auto; height: auto; max-width: none; }
+        
+        area { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="status-bar">
+        🔍 찾은 고양이: <span id="count">0</span> / 12
+    </div>
+    <br>
+    
+    <div id="game-container">
+        <img src="최종그림.jpg" usemap="#image-map">
+        
+        <map name="image-map">
+            <area alt="cat1" title="cat1" coords="193,2127,190,2169,216,2193,260,2195,284,2182,291,2150,242,2124,241,2125,212,2125,213,2125,212,2124" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat2" title="cat2" coords="869,2057,844,2093,823,2083,812,2054,773,2068,760,2107,794,2145,893,2151,898,2081" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat3" title="cat3" coords="1104,1997,1113,2060,1135,2106,1180,2107,1211,2078,1212,2041,1208,2005,1151,2000" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat4" title="cat4" coords="1542,2091,1511,2090,1486,2029,1480,1955,1493,1916,1516,1893,1584,1890,1579,1948,1563,2038" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat5" title="cat5" coords="265,1796,165,1830,142,1759,233,1736" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat6" title="cat6" coords="1654,1228,1564,1252,1535,1181,1628,1140,1671,1123" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat7" title="cat7" coords="1230,1312,1173,1314,1173,1241,1227,1213,1248,1116,1321,1119,1303,1248,1269,1290" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat8" title="cat8" coords="495,1019,416,1014,395,967,452,910,497,917,507,967" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat9" title="cat9" coords="628,560,593,539,573,576,601,631,632,638,701,594,679,529,651,545" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat10" title="cat10" coords="1235,771,1268,759,1293,750,1303,771,1298,795,1297,829,1256,853,1208,857,1195,824" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat11" title="cat11" coords="873,1139,830,1181,873,1205,911,1202,951,1192,997,1189,1036,1163,1053,1121,1068,1080,1006,1089" shape="poly" onclick="foundCat(this, event)">
+            <area alt="cat12" title="cat12" coords="212,876,210,842,174,850,173,902,174,946,249,941,277,917,242,879" shape="poly" onclick="foundCat(this, event)">
+        </map>
+    </div>
+
+    <script>
+        let foundCount = 0;
+        const totalCats = 12;
+        const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLScmhmcfHlquFg68DTqJqikfPwPRqwUyS66LEysWBG6RcxZjSw/viewform?usp=sharing&ouid=112846644520359554445"; // 구글 폼 주소를 여기에 넣어주세요!
+
+        function foundCat(element, event) {
+            // 이미 클릭된 요소라면 실행 중지
+            if (element.dataset.found === "true") return;
+
+            // 중복 클릭 방지 처리
+            element.dataset.found = "true";
+            element.style.pointerEvents = "none";
+            
+            foundCount++;
+            document.getElementById('count').innerText = foundCount;
+
+            // 클릭한 위치에 동그라미 생성
+            const container = document.getElementById('game-container');
+            const rect = container.getBoundingClientRect();
+            
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            const circle = document.createElement('div');
+            circle.className = 'circle';
+            circle.style.left = x + 'px';
+            circle.style.top = y + 'px';
+            container.appendChild(circle);
+
+            // 12마리 다 찾았을 때 로직
+            if (foundCount === totalCats) {
+                setTimeout(() => {
+                    alert("축하합니다! 12마리의 고양이를 모두 찾았습니다.\n응모 페이지(구글 폼)로 이동합니다.");
+                    window.location.href = googleFormUrl;
+                }, 800);
+            }
+        }
+    </script>
+
+</body>
+</html>
