@@ -2,125 +2,116 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>숨은 고양이 12마리 찾기 챌린지!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숨은 고양이 찾기</title>
     <style>
-        body { 
-            text-align: center; 
-            background-color: #f0f0f0; 
-            margin: 0; 
-            padding: 40px 0;
-            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-        }
-        
-        #status-bar {
-            background: white;
-            padding: 15px 40px;
-            border-radius: 50px;
-            display: inline-block;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
-            font-size: 22px;
-            font-weight: bold;
+        /* 1. 웹(PC)에서 무조건 540px로 보이게 강제 고정 */
+        #game-container {
+            position: relative;
+            width: 540px !important; 
+            margin: 0 auto;
+            border: 5px solid #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            /* 2. 마우스 커서를 화살표로 '박제' */
+            cursor: default !important;
+            overflow: hidden;
+            touch-action: none;
         }
 
-        #count { color: #ff4757; font-size: 28px; }
-
-        #game-container { 
-            position: relative; 
-            display: inline-block;
-            border: 8px solid white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            background-color: #fff;
+        img#target-img {
+            width: 100% !important;
+            height: auto !important;
+            display: block;
+            /* 이미지 위에서도 커서 변화 금지 */
+            cursor: default !important;
         }
 
-        /* 클릭 시 나타나는 동그라미 스타일 */
+        /* 클릭했을 때 생기는 빨간 원 */
         .circle {
             position: absolute;
-            border: 4px solid #ff4757;
+            border: 3px solid #ff4757;
             border-radius: 50%;
-            width: 60px; /* 고양이 크기에 맞춰 조절 */
-            height: 60px;
+            width: 40px; height: 40px;
             transform: translate(-50%, -50%);
-            pointer-events: none; 
-            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
+            pointer-events: none;
+            z-index: 999;
         }
 
-        @keyframes pop {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-
-        /* 이미지 원본 사이즈 (1080x1440 기준) */
-        img { display: block; width: auto; height: auto; max-width: none; }
-        
-        area { cursor: pointer; }
+        #status { font-size: 20px; font-weight: bold; margin: 20px 0; }
     </style>
 </head>
 <body>
 
-    <div id="status-bar">
-        🔍 찾은 고양이: <span id="count">0</span> / 12
-    </div>
-    <br>
-    
-    <div id="game-container">
-        <img src="최종그림.jpg" usemap="#image-map">
-        
-        <map name="image-map">
-            <area alt="cat1" title="cat1" coords="193,2127,190,2169,216,2193,260,2195,284,2182,291,2150,242,2124,241,2125,212,2125,213,2125,212,2124" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat2" title="cat2" coords="869,2057,844,2093,823,2083,812,2054,773,2068,760,2107,794,2145,893,2151,898,2081" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat3" title="cat3" coords="1104,1997,1113,2060,1135,2106,1180,2107,1211,2078,1212,2041,1208,2005,1151,2000" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat4" title="cat4" coords="1542,2091,1511,2090,1486,2029,1480,1955,1493,1916,1516,1893,1584,1890,1579,1948,1563,2038" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat5" title="cat5" coords="265,1796,165,1830,142,1759,233,1736" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat6" title="cat6" coords="1654,1228,1564,1252,1535,1181,1628,1140,1671,1123" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat7" title="cat7" coords="1230,1312,1173,1314,1173,1241,1227,1213,1248,1116,1321,1119,1303,1248,1269,1290" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat8" title="cat8" coords="495,1019,416,1014,395,967,452,910,497,917,507,967" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat9" title="cat9" coords="628,560,593,539,573,576,601,631,632,638,701,594,679,529,651,545" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat10" title="cat10" coords="1235,771,1268,759,1293,750,1303,771,1298,795,1297,829,1256,853,1208,857,1195,824" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat11" title="cat11" coords="873,1139,830,1181,873,1205,911,1202,951,1192,997,1189,1036,1163,1053,1121,1068,1080,1006,1089" shape="poly" onclick="foundCat(this, event)">
-            <area alt="cat12" title="cat12" coords="212,876,210,842,174,850,173,902,174,946,249,941,277,917,242,879" shape="poly" onclick="foundCat(this, event)">
-        </map>
+    <div id="status">찾은 고양이: <span id="count">0</span> / 12</div>
+
+    <div id="game-container" id="game-box">
+        <img src="최종그림.jpg" id="target-img">
     </div>
 
     <script>
         let foundCount = 0;
         const totalCats = 12;
-        const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLScmhmcfHlquFg68DTqJqikfPwPRqwUyS66LEysWBG6RcxZjSw/viewform?usp=sharing&ouid=112846644520359554445"; // 구글 폼 주소를 여기에 넣어주세요!
+        const foundList = new Set();
+        const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLScmhmcfHlquFg68DTqJqikfPwPRqwUyS66LEysWBG6RcxZjSw/viewform?usp=sharing&ouid=112846644520359554445";
 
-        function foundCat(element, event) {
-            // 이미 클릭된 요소라면 실행 중지
-            if (element.dataset.found === "true") return;
+        // 이미지 원본(1080x1440) 대비 좌표 데이터 (사각형 범위)
+        const catAreas = [
+            {id:1, x1:180, y1:2120, x2:300, y2:2200},
+            {id:2, x1:760, y1:2050, x2:910, y2:2160},
+            {id:3, x1:1100, y1:1990, x2:1220, y2:2110},
+            {id:4, x1:1470, y1:1880, x2:1590, y2:2100},
+            {id:5, x1:130, y1:1730, x2:270, y2:1840},
+            {id:6, x1:1530, y1:1120, x2:1680, y2:1260},
+            {id:7, x1:1160, y1:1110, x2:1330, y2:1320},
+            {id:8, x1:390, y1:900, x2:510, y2:1030},
+            {id:9, x1:570, y1:520, x2:710, y2:650},
+            {id:10, x1:1190, y1:740, x2:1310, y2:870},
+            {id:11, x1:820, y1:1070, x2:1070, y2:1210},
+            {id:12, x1:160, y1:830, x2:280, y2:950}
+        ];
 
-            // 중복 클릭 방지 처리
-            element.dataset.found = "true";
-            element.style.pointerEvents = "none";
+        const container = document.getElementById('game-container');
+        const img = document.getElementById('target-img');
+
+        container.addEventListener('click', function(e) {
+            const rect = img.getBoundingClientRect();
             
-            foundCount++;
-            document.getElementById('count').innerText = foundCount;
+            // 현재 화면상의 클릭 위치
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
 
-            // 클릭한 위치에 동그라미 생성
-            const container = document.getElementById('game-container');
-            const rect = container.getBoundingClientRect();
-            
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+            // 이미지가 줄어든 비율 계산 (540px / 1080px 등)
+            const ratioX = img.clientWidth / 1080;
+            const ratioY = img.clientHeight / 1440;
 
-            const circle = document.createElement('div');
-            circle.className = 'circle';
-            circle.style.left = x + 'px';
-            circle.style.top = y + 'px';
-            container.appendChild(circle);
+            // 클릭한 위치를 원본 좌표로 변환
+            const logicX = mouseX / ratioX;
+            const logicY = mouseY / ratioY;
 
-            // 12마리 다 찾았을 때 로직
-            if (foundCount === totalCats) {
-                setTimeout(() => {
-                    alert("축하합니다! 12마리의 고양이를 모두 찾았습니다.\n응모 페이지(구글 폼)로 이동합니다.");
-                    window.location.href = googleFormUrl;
-                }, 800);
-            }
-        }
+            catAreas.forEach(cat => {
+                if (!foundList.has(cat.id)) {
+                    if (logicX >= cat.x1 && logicX <= cat.x2 && logicY >= cat.y1 && logicY <= cat.y2) {
+                        foundList.add(cat.id);
+                        foundCount++;
+                        document.getElementById('count').innerText = foundCount;
+
+                        // 빨간 원 생성
+                        const circle = document.createElement('div');
+                        circle.className = 'circle';
+                        circle.style.left = mouseX + 'px';
+                        circle.style.top = mouseY + 'px';
+                        container.appendChild(circle);
+
+                        if (foundCount === totalCats) {
+                            setTimeout(() => {
+                                alert("모두 찾았습니다! 응모 폼으로 이동합니다.");
+                                window.location.href = googleFormUrl;
+                            }, 500);
+                        }
+                    }
+                }
+            });
+        });
     </script>
-
 </body>
 </html>
